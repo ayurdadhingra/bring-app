@@ -64,7 +64,7 @@ def ollama_infer(receipt_item: str, bring_items_list: List[str]) -> str:
     }
 
     try:
-        response = requests.post(url, json={"model": "llama3.2:3b", "prompt": prompt},
+        response = requests.post(url, json={"model": "mistral", "prompt": prompt},
                                  headers=headers, stream=True)
         collected = ""
         for line in response.iter_lines():
