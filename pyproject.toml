@@ -1,0 +1,14 @@
+[project]
+name = "bring-app"
+version = "0.1.0"
+description = "Automatisierung der Einkaufslistenverwaltung durch KI-gestützte Beleglesung"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "dotenv>=0.9.9",
+    "ollama>=0.6.0",
+    "opencv-python>=4.12.0.88",
+    "pytesseract>=0.3.13",
+    "python-bring-api>=3.0.0",
+    "requests>=2.32.5",
+]
