@@ -50,6 +50,11 @@ def ollama_infer(receipt_item: str, bring_items_list: List[str]) -> str:
         "- Item names may be in a different language.\n"
         "- The item list might contain brand names instead of product names.\n"
         "- Items might appear as partial matches in the receipt.\n"
+        "### Rules ###\n"
+         "- Do not explain, reason, or write code.\n"
+         "- Do not output anything except the final result.\n"
+        "- Output must be plain text, no formatting, no quotes, no code.\n"
+         "### Output ###\n"
         f"Item_list: {bring_items_list}\n"
         f"Item: {receipt_item}\n"
         "Return either the exact matching item from the list or 'No match found'."
@@ -60,22 +65,36 @@ def ollama_infer(receipt_item: str, bring_items_list: List[str]) -> str:
         raise ValueError("Please ensure OLLAMA_API_TOKEN environment variable is set.")
 
     headers = {
-        "Authorization": OLLAMA_API_TOKEN
+        "Authorization": ollama_api_token
     }
 
     try:
-        response = requests.post(url, json={"model": "mistral", "prompt": prompt},
-                                 headers=headers, stream=True)
-        collected = ""
-        for line in response.iter_lines():
-            if line:
-                data = json.loads(line.decode("utf-8"))
-                collected += data.get("response", "")
-        return collected.strip() if collected else "No match found"
+        response = requests.post(
+            url,
+            json={"model": "llama3.2:3b", "prompt": prompt, "stream": False},
+            headers=headers,
+            timeout=60
+        )
+        response.raise_for_status()
+        data = response.json()
+        return data.get("response", "No match found").strip()
 
     except Exception as e:
         print(f"Error during Ollama inference for item '{receipt_item}': {e}")
         return "No match found"
+    # try:
+    #     response = requests.post(url, json={"model": "llama3.2:3b", "prompt": prompt},
+    #                              headers=headers, stream=False)
+    #     collected = ""
+    #     for line in response.iter_lines():
+    #         if line:
+    #             data = json.loads(line.decode("utf-8"))
+    #             collected += data.get("response", "")
+    #     return collected.strip() if collected else "No match found"
+
+    # except Exception as e:
+    #     print(f"Error during Ollama inference for item '{receipt_item}': {e}")
+    #     return "No match found"
 
 
 # -------------------- CATEGORIZATION MODULE -------------------- #
@@ -119,6 +138,7 @@ def fetch_bring_items(bring_instance, all_lists) -> List[str]:
     Extract item names from Bring 'purchase' list.
     """
     current_items = load_items(bring_instance, all_lists)
+    print(current_items)
     return [item['name'] for item in current_items.get('purchase', [])]
 
 
@@ -161,5 +181,6 @@ if __name__ == "__main__":
     if bring_data:
         bring_instance, all_lists = bring_data
         bring_items = fetch_bring_items(bring_instance, all_lists)
+        print(bring_items)
         categorized = process_receipt("receipt.jpg", bring_items)
         update_bring_list(bring_instance, all_lists, categorized)

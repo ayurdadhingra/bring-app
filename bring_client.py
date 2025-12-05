@@ -1,10 +1,11 @@
 import logging
 import sys
 import os
+import asyncio
 from typing import List, Dict, Any
 from dotenv import load_dotenv
 from python_bring_api.bring import Bring
-
+import aiohttp
 # Load environment variables from .env
 load_dotenv()
 
@@ -30,7 +31,21 @@ def login_bring() -> Bring:
         key = input("Password/API Key: ").strip()
 
     bring = Bring(email, key)
-    bring.login()
+    async def _do_login():
+        bring._session = aiohttp.ClientSession()
+        await bring.loginAsync()
+        return bring
+
+    try:
+        loop = asyncio.get_running_loop()
+        # Already in an event loop (e.g., Kaggle)
+        logging.info("Detected running event loop — using create_task() for async login.")
+        task = loop.create_task(_do_login())
+        bring_instance = loop.run_until_complete(task)
+    except RuntimeError:
+        # No running event loop (normal Python)
+        bring_instance = asyncio.run(_do_login())
+    
     logging.info(f"Successfully logged in to Bring! as {email}")
     return bring
 
@@ -93,7 +108,7 @@ if __name__ == "__main__":
         logging.info(f"Current items: {items}")
 
         # Example action
-        check_off_item(bring_instance, lists, 'Carrots')
+        check_off_item(bring_instance, lists, 'Kiwis')
 
     except Exception as e:
         logging.error(f"Error: {e}")
