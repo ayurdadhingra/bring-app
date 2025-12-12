@@ -1,10 +1,18 @@
 # Kassenbon-Einkaufslisten-Abgleich
 
-Automatisierung der Einkaufslistenverwaltung durch KI-gestützte Beleglesung
-- Dokumentenverarbeitung: OCR-basierte Textextraktion aus Kassenbon-Fotos mittels PyTesseract
-- Zuordnung von Produktkategorien: Qwen3 mit Outlines-Decoding für strukturierte Outputs
-- API-Anbindung: Verwendet offizielle Bring Einkaufslisten-App API zur Entfernung erworbener Artikel
+- Dokumentenverarbeitung: OCR-basierte Textextraktion aus Kassenbon-Fotos
 
+  - CPU-Version: PyTesseract
+
+  - Kaggle/GPU: DeepSeekOCR
+
+- Zuordnung von Produktkategorien:
+
+  - CPU-Version: Llama 3.2 3B
+
+  - Kaggle/GPU: Qwen/Qwen2.5-7B-Instruct mit Outlines-Decoding für strukturierte Outputs
+
+- API-Anbindung: Verwendet offizielle Bring Einkaufslisten-App API zur Entfernung erworbener Artikel unter Nutzung von asyncio/aiohttp für asynchrone API-Anfragen
 
 ## Setup
 
